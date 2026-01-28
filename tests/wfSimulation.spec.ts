@@ -1,75 +1,95 @@
-// Water Flow Simulation
-// Decision Table Testing is a Black Box test design technique (behavioral or
-// behavior-based technique), used where different combinations of test input
-// conditions result in different outcomes. Prepare decision table matrix to find bug.
-
 import { test, expect } from '@playwright/test';
 
-test('All pipes are open', async ({ page }) => {
+test('All pipes are open. Simple loop method', async ({ page }) => {
   
-  //variables used in the testing
+  //Valves - clickable buttons.
     const waterFlowSimulationWindow = 'https://www.testingmarathon.com/testing/WaterFlowSimulation/';
-    const Valve1 = page.locator('[id="valve1"]');
-    // const Valve2 = page.locator('[id="valve2"]');
-    // const Valve3 = page.locator('[id="valve3"]');
-    // const Valve4 = page.locator('[id="valve4"]');
-    // const Valve5 = page.locator('[id="valve5"]');
 
-    const Pipe1 = page.locator('[id="pipe1"]');
-    // const Pipe2 = page.locator('[id="pipe2"]');
-    // const Pipe3 = page.locator('[id="pipe3"]');
-    // const Pipe4 = page.locator('[id="pipe4"]');
-    // const Pipe5 = page.locator('[id="pipe5"]');
+    const valves = [
+      page.locator('#valve1'), 
+      page.locator('#valve2'), 
+      page.locator('#valve3'), 
+      page.locator('#valve4'), 
+      page.locator('#valve5')
+    ];
 
-    const Indicator1 = page.locator('[id="indicator1"]');
-    const Indicator2 = page.locator('[id="indicator2"]');
-    const Indicator3 = page.locator('[id="indicator3"]');
-    const Indicator4 = page.locator('[id="indicator4"]');
-    const Indicator5 = page.locator('[id="indicator5"]');
-  
+    const pipes = [
+      page.locator('#pipe1'), 
+      page.locator('#pipe2'),
+      page.locator('#pipe3'),
+      page.locator('#pipe4'),
+      page.locator('#pipe5')
+    ];
+
+    const indicators = [
+      page.locator('#indicator1'),
+      page.locator('#indicator2'),
+      page.locator('#indicator3'),
+      page.locator('#indicator4'),
+      page.locator('#indicator5')
+    ];
+
+    // confirmation, that Valves and Pipes are present on the page
   await page.goto(waterFlowSimulationWindow);
   await expect(page).toHaveTitle(/Water Flow Simulation/);
-  // await expect(Valve1).toHaveText('Valve 1');
-  // await expect(Valve2).toHaveText('Valve 2');
-  // await expect(Valve3).toHaveText('Valve 3');
-  // await expect(Valve4).toHaveText('Valve 4');
-  // await expect(Valve5).toHaveText('Valve 5');
 
-  // await expect(Pipe1).toHaveText('pipe 1');
-  // await expect(Pipe2).toHaveText('pipe 2');
-  // await expect(Pipe3).toHaveText('pipe 3');
-  // await expect(Pipe4).toHaveText('pipe 4');
-  // await expect(Pipe5).toHaveText('pipe 5');
+  for (let i = 0; i < valves.length; i++) {
 
- 
-//   await expect(Indicator1).toBeVisible(); 
-//   await expect(Indicator1).toBeEnabled();
-//   await Indicator1.hover();
-//    const box = await Indicator1.boundingBox();
-// if (!box) {
-//   throw new Error("Indicator1 is not visible or not in the DOM");
-// }
-
-// await page.mouse.click(
-//   box.x + box.width / 5,
-//   box.y + box.height / 5
-// );
-
+    await expect(valves[i]).toHaveText(`Valve ${i + 1}`);
+    await expect(pipes[i]).toHaveText(`pipe ${i + 1}`);
+  }
+// //confirmation that the pipes and indicators are in closed state
   await page.waitForTimeout(1000);
-  await expect(Pipe1).toHaveCSS('background-color','rgb(128, 128, 128)');
-  await Valve1.waitFor({ state: 'visible' });
-  await page.waitForLoadState('networkidle');
-  await Valve1.click({ delay: 1000 });
-  // await Indicator2.click({button:"left"});
-  // await Indicator3.click({button:"left"});
-  // await Indicator4.click({button:"left"});
-  // await Indicator5.click({button:"left"});
-// 
-  await expect(Pipe1).toHaveCSS('background-color','rgb(33, 150, 243)');
-  // await expect(Indicator1).toHaveCSS('background-color','rgb(76, 175, 80)');
-  // await expect(Indicator2).toHaveCSS('background-color','rgb(255, 0, 0)');
-  // await expect(Indicator3).toHaveCSS('background-color','rgb(255, 0, 0)');
-  // await expect(Indicator4).toHaveCSS('background-color','rgb(255, 0, 0)');
-  // await expect(Indicator5).toHaveCSS('background-color','rgb(255, 0, 0)');
+
+  for (const p of pipes) {
+    await expect(p).toHaveCSS('background-color', 'rgb(128, 128, 128)');
+  }
+
+  for (const ind of indicators) {
+    await expect(ind).toHaveCSS('background-color', 'rgb(255, 0, 0)');
+  }
+
+   for (const v of valves) {
+    await v.click({ delay: 1000 });
+  }
+
+  // Confirm open state
+  for (const p of pipes) {
+    await expect(p).toHaveCSS('background-color', 'rgb(33, 150, 243)');
+  }
+  for (const ind of indicators) {
+    await expect(ind).toHaveCSS('background-color', 'rgb(76, 175, 80)');
+  }
+
+});
+
+test('All pipes are open. Practical method', async ({ page }) => {
+  
+    const waterFlowSimulationWindow = 'https://www.testingmarathon.com/testing/WaterFlowSimulation/';
+
+  await page.goto(waterFlowSimulationWindow);
+  await expect(page).toHaveTitle(/Water Flow Simulation/);
+
+  const config = [
+  { Valve: '#valve1', pipe: '#pipe1', indicator: '#indicator1' },
+  { Valve: '#valve2', pipe: '#pipe2', indicator: '#indicator2' },
+  { Valve: '#valve3', pipe: '#pipe3', indicator: '#indicator3' },
+  { Valve: '#valve4', pipe: '#pipe4', indicator: '#indicator4' },
+  { Valve: '#valve5', pipe: '#pipe5', indicator: '#indicator5' },
+];
+
+for (const idx of config.keys()) {
+  const v = page.locator(config[idx].Valve);
+  const p = page.locator(config[idx].pipe);
+  const ind = page.locator(config[idx].indicator);
+
+  await expect(p).toHaveCSS('background-color', 'rgb(128, 128, 128)');
+  await expect(ind).toHaveCSS('background-color', 'rgb(255, 0, 0)');
+
+  await v.click({ delay: 1000 });
+
+  await expect(p).toHaveCSS('background-color', 'rgb(33, 150, 243)');
+  await expect(ind).toHaveCSS('background-color', 'rgb(76, 175, 80)');
+}
 
 });
